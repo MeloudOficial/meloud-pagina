@@ -1,53 +1,333 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
-    
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Red Social</title>
-    <script type="module" src="app.js"></script>
+    <title>Meloud</title>
+    <script>
+        // Estado global para controlar la autenticación y las publicaciones
+        let loggedIn = false;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginButton = document.getElementById("login");
+            const logoutButton = document.getElementById("logout");
+            const feed = document.getElementById("feed");
+            const sidebar = document.querySelector(".sidebar");
+            const postButton = document.getElementById("post");
+            const postsList = document.getElementById("posts-list");
+
+            // Función para mostrar/ocultar la barra lateral y el feed según el estado de sesión
+            function toggleAuthState() {
+                if (loggedIn) {
+                    sidebar.style.display = "block";
+                    feed.style.display = "block";
+                    loginButton.style.display = "none";
+                    logoutButton.style.display = "inline-block";
+                } else {
+                    sidebar.style.display = "none";
+                    feed.style.display = "none";
+                    loginButton.style.display = "inline-block";
+                    logoutButton.style.display = "none";
+                }
+            }
+
+            // Iniciar sesión
+            loginButton.addEventListener("click", () => {
+                loggedIn = true;
+                toggleAuthState();
+            });
+
+            // Cerrar sesión
+            logoutButton.addEventListener("click", () => {
+                loggedIn = false;
+                toggleAuthState();
+            });
+
+            // Publicar un nuevo post
+            postButton.addEventListener("click", () => {
+                const newPostInput = document.getElementById("new-post");
+                const postContent = newPostInput.value.trim();
+
+                if (postContent !== "") {
+                    const newPost = document.createElement("li");
+                    newPost.innerHTML = `
+                        <div class="post-content">${postContent}</div>
+                        <div class="post-actions">
+                            <button class="like-btn">👍 <span>0</span> Me gusta</button>
+                            <div class="comments-section">
+                                <input class="comment-input" placeholder="Deja un comentario..." />
+                                <button class="comment-btn">Comentar</button>
+                                <ul class="comments-list"></ul>
+                            </div>
+                        </div>
+                    `;
+                    postsList.prepend(newPost);
+                    newPostInput.value = "";
+                }
+            });
+
+            // Delegación de eventos para likes y comentarios
+            postsList.addEventListener("click", (e) => {
+                // Like
+                if (e.target.classList.contains("like-btn")) {
+                    const likeButton = e.target;
+                    const likeCount = likeButton.querySelector("span");
+                    let count = parseInt(likeCount.textContent, 10);
+
+                    // Alternar el estado del like
+                    if (likeButton.classList.contains("liked")) {
+                        count--;
+                        likeButton.classList.remove("liked");
+                    } else {
+                        count++;
+                        likeButton.classList.add("liked");
+                    }
+                    likeCount.textContent = count;
+                }
+
+                // Comentario
+                if (e.target.classList.contains("comment-btn")) {
+                    const commentBtn = e.target;
+                    const commentInput = commentBtn.previousElementSibling;
+                    const commentText = commentInput.value.trim();
+                    const commentsList = commentBtn.nextElementSibling;
+
+                    if (commentText !== "") {
+                        const commentItem = document.createElement("li");
+                        commentItem.classList.add("comment-item");
+                        commentItem.textContent = commentText;
+                        commentsList.appendChild(commentItem);
+                        commentInput.value = "";
+                    }
+                }
+            });
+
+            // Inicializar el estado
+            toggleAuthState();
+        });
+    </script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f5f5f5;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        button {
-            padding: 10px 20px;
-            margin: 10px;
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            height: 100vh;
+            color: #333;
+        }
+
+        /* Estilos para la barra lateral */
+        .sidebar {
+            width: 240px;
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            display: none; /* Ocultar por defecto */
+        }
+
+        .sidebar h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        /* Contenedor principal */
+        .container {
+            margin-left: 260px; /* Espacio para la barra lateral */
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .auth-buttons button {
+            padding: 10px;
+            font-size: 16px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-        button:hover {
+
+        .auth-buttons button:hover {
             background-color: #0056b3;
         }
+
         #feed {
+            display: none;
             margin-top: 20px;
-            background: white;
-            padding: 20px;
+        }
+
+        #new-post {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        #post {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #post:hover {
+            background-color: #218838;
+        }
+
+        #posts-list {
+            list-style-type: none;
+            margin-top: 20px;
+            padding: 0;
+        }
+
+        #posts-list li {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .post-content {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .like-btn {
+            background-color: transparent;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+        }
+
+        .like-btn:hover {
+            text-decoration: underline;
+        }
+
+        .like-btn.liked {
+            color: #28a745; /* Cambiar color cuando está activo */
+        }
+
+        .comments-section {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .comment-btn {
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .comment-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .comments-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .comment-item {
+            padding: 8px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            margin-bottom: 5px;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
-    <h1>Bienvenido a Mi Red Social</h1>
-    <div id="auth-container">
-        <button id="login">Iniciar sesión</button>
-        <button id="register">Registrarse</button>
-        <button id="logout" style="display: none;">Cerrar sesión</button>
+
+    <div class="sidebar">
+        <h2>Menú</h2>
+        <a href="#">Inicio</a>
+        <a href="#">Mensajes</a>
+        <a href="#">Explorar</a>
+        <a href="#">Notificaciones</a>
+        <a href="#">Perfil</a>
     </div>
-    <div id="feed" style="display: none;">
-        <h2>Publicaciones</h2>
-        <textarea id="new-post" placeholder="¿Qué estás pensando?" rows="3" style="width: 80%; margin-bottom: 10px;"></textarea><br>
-        <button id="post">Publicar</button>
-        <ul id="posts-list"></ul>
+
+    <div class="container">
+        <h1>Meloud</h1>
+        <div id="auth-container" class="auth-buttons">
+            <button id="login">Iniciar sesión</button>
+            <button id="register">Registrarse</button>
+            <button id="logout" style="display: none;">Cerrar sesión</button>
+        </div>
+
+        <div id="feed">
+            <textarea id="new-post" placeholder="¿Qué estás pensando?" rows="3"></textarea><br>
+            <button id="post">Publicar</button>
+            <ul id="posts-list"></ul>
+        </div>
     </div>
+
 </body>
 </html>
