@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Social</title>
+    <script type="module" src="app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #feed {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Bienvenido a Mi Red Social</h1>
+    <div id="auth-container">
+        <button id="login">Iniciar sesión</button>
+        <button id="register">Registrarse</button>
+        <button id="logout" style="display: none;">Cerrar sesión</button>
+    </div>
+    <div id="feed" style="display: none;">
+        <h2>Publicaciones</h2>
+        <textarea id="new-post" placeholder="¿Qué estás pensando?" rows="3" style="width: 80%; margin-bottom: 10px;"></textarea><br>
+        <button id="post">Publicar</button>
+        <ul id="posts-list"></ul>
+    </div>
+</body>
+</html>
